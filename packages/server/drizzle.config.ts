@@ -7,7 +7,7 @@ export default {
   dbCredentials: {
     host: 'localhost',
     user: 'root',
-    password: 'password',
+    password: 'root',
     database: 'test_flow_form',
   },
 } satisfies Config;

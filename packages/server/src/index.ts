@@ -7,7 +7,7 @@ import { createFormController } from './controllers/form.controller';
 import { createUserController } from './controllers/user.controller';
 import { FormService } from './services/form.service';
 import { UserService } from './services/user.service';
-
+import config from '../drizzle.config';
 const app = new Koa();
 const router = new Router();
 
@@ -16,12 +16,7 @@ app.use(bodyParser());
 
 // Database connection
 const setupDatabase = async () => {
-  const connection = await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'test_flow_form'
-  });
+  const connection = await mysql.createConnection(config.dbCredentials);
 
   return drizzle(connection);
 };

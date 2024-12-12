@@ -1,14 +1,12 @@
 import { drizzle } from 'drizzle-orm/mysql2';
 import { migrate } from 'drizzle-orm/mysql2/migrator';
 import mysql from 'mysql2/promise';
+import config from '../../drizzle.config';
 
 async function runMigrations() {
-  // Database connection configuration
+  // Database connection configuration using drizzle config
   const connection = await mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'password',
-    database: 'test_flow_form',
+    ...config.dbCredentials,
     multipleStatements: true,
   });
 

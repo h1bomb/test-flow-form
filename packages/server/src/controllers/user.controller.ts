@@ -18,23 +18,24 @@ export function createUserController(userService: UserService) {
   // Register new user
   router.post('/register', async (ctx: Context) => {
     const { username, password } = ctx.request.body as UserAuthBody;
-    try {
-      // Check if user already exists
-      const existingUser = await userService.findUserByUsername(username);
-      if (existingUser) {
-        ctx.status = 400;
-        ctx.body = { success: false, error: 'Username already exists' };
-        return;
-      }
+    
+    // Validate required fields
+    if (!username || !password) {
+      ctx.status = 400;
+      ctx.body = { success: false, error: 'Username and password are required' };
+      return;
+    }
 
-      const result = await userService.createUser({ username, password });
-      const user: UserResponse = {
-        id: result.id,
-        username
-      };
+    try {
+      const user = await userService.createUser({ username, password });
+      ctx.status = 200;
       ctx.body = { success: true, data: user };
     } catch (error: any) {
-      ctx.status = 500;
+      if (error.message.includes('already exists')) {
+        ctx.status = 409;
+      } else {
+        ctx.status = 500;
+      }
       ctx.body = { success: false, error: error.message };
     }
   });

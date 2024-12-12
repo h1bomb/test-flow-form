@@ -8,6 +8,7 @@
     "build": "pnpm run --parallel build",
     "clean": "pnpm run --parallel clean",
     "test": "pnpm run --filter test-flow-form-test test",
+    "test:server": "pnpm run --filter @test-flow-form/server test",
     "db:generate": "pnpm run --filter @test-flow-form/server db:generate",
     "db:push": "pnpm run --filter @test-flow-form/server db:push",
     "db:migrate": "pnpm run --filter @test-flow-form/server db:migrate",
