@@ -1,0 +1,29 @@
+{
+  "name": "test-flow-form",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "dev": "pnpm run --parallel dev",
+    "build": "pnpm run --parallel build",
+    "clean": "pnpm run --parallel clean",
+    "test": "pnpm run --filter test-flow-form-test test",
+    "db:generate": "pnpm run --filter @test-flow-form/server db:generate",
+    "db:push": "pnpm run --filter @test-flow-form/server db:push",
+    "db:migrate": "pnpm run --filter @test-flow-form/server db:migrate",
+    "db:studio": "pnpm run --filter @test-flow-form/server db:studio",
+    "dev:server": "pnpm run --filter @test-flow-form/server dev",
+    "dev:client": "pnpm run --filter @test-flow-form/client dev",
+    "build:server": "pnpm run --filter @test-flow-form/server build",
+    "build:client": "pnpm run --filter @test-flow-form/client build",
+    "start:server": "pnpm run --filter @test-flow-form/server start",
+    "start:client": "pnpm run --filter @test-flow-form/client preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  }
+}
