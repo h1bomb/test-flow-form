@@ -3,6 +3,7 @@ import { FormSpecification, FormInstanceListItem, FormInstanceDetail } from '../
 
 const api = axios.create({
   baseURL: 'http://localhost:3000/api',
+  withCredentials: true, // 允许跨域请求携带 cookie
   headers: {
     'Content-Type': 'application/json',
   },
@@ -14,6 +15,8 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // 确保每个请求都带上 credentials
+  config.withCredentials = true;
   return config;
 });
 
@@ -36,6 +39,7 @@ export interface LoginData {
 
 export interface LoginResponse {
   token: string;
+  userId: number;
 }
 
 export interface FormInstanceUpdate {
@@ -47,6 +51,14 @@ export interface FormInstanceUpdate {
 export const userApi = {
   login: (data: LoginData) => api.post<LoginResponse>('/users/login', data).then(res => res.data),
   register: (data: LoginData) => api.post<void>('/users/register', data).then(res => res.data),
+  logout: async () => {
+    const response = await api.post('/users/logout');
+    return response.data;
+  },
+  getCurrentUser: async () => {
+    const response = await api.get<any>('/users/current');
+    return response.data;
+  },
 };
 
 // 表单相关 API

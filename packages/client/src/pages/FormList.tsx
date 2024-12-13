@@ -1,27 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { Table, Card, Button, Tag, Space } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import { Card, Table, Button, Space, message, Tabs, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { FormInstanceListItem } from '../types/form';
 import { formApi } from '../services/api';
+import type { User } from '../contexts/AuthContext';
 
-const FormList: React.FC = () => {
+interface FormListProps {}
+
+const FormList: React.FC<FormListProps> = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [formInstances, setFormInstances] = useState<FormInstanceListItem[]>([]);
+  const [activeTab, setActiveTab] = useState('all');
+
+  const fetchFormInstances = async () => {
+    try {
+      setLoading(true);
+      const response = await formApi.getFormInstances();
+      setFormInstances(response);
+    } catch (error) {
+      message.error('获取表单实例列表失败');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchFormInstances();
   }, []);
 
-  const fetchFormInstances = async () => {
-    try {
-      const response = await formApi.getFormInstances();
-      setFormInstances(response);
-    } catch (error) {
-      console.error('Failed to fetch form instances:', error);
-    } finally {
-      setLoading(false);
+  const getFilteredInstances = () => {
+    const user = JSON.parse(localStorage.getItem('user') || '{}') as User;
+    switch (activeTab) {
+      case 'handled':
+        return formInstances.filter(instance => {
+          const flowConfig = JSON.parse(instance.flowConfig ?? '{ "nodes": [] }');
+          const currentNode = flowConfig.nodes.find((node: { handler: string; }) => node.handler === user.username);
+          return !!currentNode && currentNode.id !== instance.currentStatus;
+        });
+      case 'handling':
+        return formInstances.filter(instance => {
+          const flowConfig = JSON.parse(instance.flowConfig ?? '{ "nodes": [] }');
+          const currentNode = flowConfig.nodes.find((node: { handler: string; }) => node.handler === user.username);
+          return !!currentNode && currentNode.id === instance.currentStatus;
+        });
+      case 'created':
+        return formInstances.filter(instance => instance.creatorName === user.username);
+      default:
+        return formInstances;
     }
   };
 
@@ -50,18 +77,25 @@ const FormList: React.FC = () => {
   const columns: ColumnsType<FormInstanceListItem> = [
     {
       title: '表单名称',
-      dataIndex: 'formSpecName',
-      key: 'formSpecName',
+      dataIndex: 'formName',
+      key: 'formName',
     },
     {
       title: '提交人',
-      dataIndex: 'submitter',
-      key: 'submitter',
+      dataIndex: 'creatorName',
+      key: 'creatorName',
     },
     {
-      title: '处理人',
+      title: '当前处理人',
       dataIndex: 'handler',
       key: 'handler',
+      render: (_handler, record) => {
+        const flowConfig = JSON.parse(record.flowConfig ?? '{ "nodes": [] }');
+        const currentNode = flowConfig.nodes.find(
+          (node: { id: string; handler?: string }) => node.id === record.currentStatus
+        );
+        return currentNode?.handler || '-';  
+      },
     },
     {
       title: '当前状态',
@@ -93,21 +127,25 @@ const FormList: React.FC = () => {
 
   return (
     <Card 
-      title="表单实例列表"
-      extra={
-        <Button 
-          type="primary" 
-          onClick={() => navigate('/forms/design')}
-        >
-          创建新表单
-        </Button>
-      }
+      title="待处理流程"
     >
+      <Tabs 
+        activeKey={activeTab} 
+        onChange={setActiveTab}
+        style={{ marginBottom: 16 }}
+        items={[
+          { label: '全部', key: 'all' },
+          { label: '待我处理的', key: 'handling' },
+          { label: '我已处理的', key: 'handled' },
+          { label: '我提交的', key: 'created' },
+        ]}
+      />
+      
       <Table
         columns={columns}
-        dataSource={formInstances}
-        rowKey="id"
+        dataSource={getFilteredInstances()}
         loading={loading}
+        rowKey="id"
         pagination={{
           defaultPageSize: 10,
           showSizeChanger: true,

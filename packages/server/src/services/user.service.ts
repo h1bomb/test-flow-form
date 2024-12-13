@@ -72,4 +72,16 @@ export class UserService {
     }
     return null;
   }
+
+  async findByUsername(username: string): Promise<UserResponse | null> {
+    const result = await this.db
+      .select({
+        id: users.id,
+        username: users.username,
+      })
+      .from(users)
+      .where(eq(users.username, username));
+
+    return result[0] || null;
+  }
 }

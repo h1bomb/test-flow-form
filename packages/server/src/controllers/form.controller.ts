@@ -45,17 +45,65 @@ export function createFormController(formService: FormService) {
     }
   });
 
+  // Get form specifications
+  router.get('/specs', async (ctx: Context) => {
+    try {
+      const result = await formService.getFormSpecs();
+      ctx.body = { success: true, data: result };
+    } catch (error: any) {
+      ctx.status = 500;
+      ctx.body = { success: false, error: error.message };
+    }
+  });
+
+  // Get single form specification
+  router.get('/specs/:id', async (ctx: Context) => {
+    const id = parseInt(ctx.params.id);
+    
+    if (isNaN(id)) {
+      ctx.status = 400;
+      ctx.body = { success: false, error: 'Invalid form specification ID' };
+      return;
+    }
+
+    try {
+      const result = await formService.getFormSpec(id);
+      if (!result) {
+        ctx.status = 404;
+        ctx.body = { success: false, error: 'Form specification not found' };
+        return;
+      }
+      ctx.body = { success: true, data: result };
+    } catch (error: any) {
+      ctx.status = 500;
+      ctx.body = { success: false, error: error.message };
+    }
+  });
+
   // Save form instance
   router.post('/instances', async (ctx: Context) => {
-    const { userId, formSpecId, currentStatus, formData, flowRemark } = 
+    const userId = ctx.session?.userId;
+    
+    if (!userId) {
+      ctx.status = 401;
+      ctx.body = { success: false, error: 'Please login first' };
+      return;
+    }
+
+    const { formSpecId, currentStatus, formData, flowRemark } = 
       ctx.request.body as FormInstanceBody;
     
     // Validate required fields
-    if (!userId || !formSpecId || !currentStatus || !formData) {
+    const missingFields = [];
+    if (!formSpecId) missingFields.push('formSpecId');
+    if (!currentStatus) missingFields.push('currentStatus');
+    if (!formData) missingFields.push('formData');
+
+    if (missingFields.length > 0) {
       ctx.status = 400;
       ctx.body = { 
         success: false, 
-        error: 'Missing required fields: userId, formSpecId, currentStatus, and formData are required' 
+        error: `Missing required fields: ${missingFields.join(', ')}` 
       };
       return;
     }
@@ -154,6 +202,30 @@ export function createFormController(formService: FormService) {
       }
 
       ctx.body = errorResponse;
+    }
+  });
+
+  // Get single form instance
+  router.get('/instances/:id', async (ctx: Context) => {
+    const id = parseInt(ctx.params.id);
+    
+    if (isNaN(id)) {
+      ctx.status = 400;
+      ctx.body = { success: false, error: 'Invalid form instance ID' };
+      return;
+    }
+
+    try {
+      const result = await formService.getFormInstance(id);
+      if (!result) {
+        ctx.status = 404;
+        ctx.body = { success: false, error: 'Form instance not found' };
+        return;
+      }
+      ctx.body = { success: true, data: result };
+    } catch (error: any) {
+      ctx.status = 500;
+      ctx.body = { success: false, error: error.message };
     }
   });
 

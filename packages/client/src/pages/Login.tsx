@@ -12,7 +12,10 @@ const Login: React.FC = () => {
   const onFinish = async (values: LoginData) => {
     try {
       const response = await userApi.login(values);
-      login(response.token);
+      login({
+        id: response?.userId,
+        username: values?.username
+      });
       message.success('登录成功');
       navigate('/');
     } catch (error) {

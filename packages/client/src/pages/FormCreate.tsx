@@ -55,7 +55,10 @@ const FormCreate: React.FC = () => {
   };
 
   const onFinish = async (values: Record<string, any>) => {
-    if (!formSpec) return;
+    if (!formSpec) {
+      message.error('表单配置不存在');
+      return;
+    }
 
     try {
       const formInstance = {
@@ -68,8 +71,13 @@ const FormCreate: React.FC = () => {
       await formApi.createFormInstance(formInstance);
       message.success('表单提交成功');
       navigate('/forms');
-    } catch (error) {
-      message.error('表单提交失败');
+    } catch (error: any) {
+      if (error.response?.status === 401) {
+        message.error('请先登录');
+        navigate('/login');
+      } else {
+        message.error('表单提交失败');
+      }
     }
   };
 
@@ -92,18 +100,16 @@ const FormCreate: React.FC = () => {
   return (
     <Card 
       title={formSpec.name}
-      extra={<div>创建表单实例</div>}
     >
       <Form
         form={form}
         layout="vertical"
         onFinish={onFinish}
       >
-        {formSpec.formConfig.fields.map(field => renderFormItem(field))}
-
+        {formSpec.formConfig.fields.map(renderFormItem)}
         <Form.Item>
-          <Button type="primary" htmlType="submit" block>
-            提交表单
+          <Button type="primary" htmlType="submit">
+            提交
           </Button>
         </Form.Item>
       </Form>

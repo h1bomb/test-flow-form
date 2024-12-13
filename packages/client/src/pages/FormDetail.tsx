@@ -12,14 +12,16 @@ import {
   Form,
   Divider
 } from 'antd';
-import { FormInstanceDetail } from '../types/form';
+import { FormInstanceDetail, FormConfig, FlowConfig, FormField } from '../types/form';
 import { formApi } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 
 const { TextArea } = Input;
 
 const FormDetail: React.FC = () => {
   const { instanceId } = useParams<{ instanceId: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
   const [formInstance, setFormInstance] = useState<FormInstanceDetail | null>(null);
@@ -42,8 +44,9 @@ const FormDetail: React.FC = () => {
 
   const getCurrentStep = () => {
     if (!formInstance) return 0;
-    return formInstance.formSpec.flowConfig.nodes.findIndex(
-      node => node.id === formInstance.currentStatus
+    const flowConfig: FlowConfig = JSON.parse(formInstance.flowConfig);
+    return flowConfig.nodes.findIndex(
+      (node) => node.id === formInstance.currentStatus
     );
   };
 
@@ -51,7 +54,8 @@ const FormDetail: React.FC = () => {
     if (!formInstance) return;
 
     const currentStepIndex = getCurrentStep();
-    const nextNode = formInstance.formSpec.flowConfig.nodes[currentStepIndex + 1];
+    const flowConfig: FlowConfig = JSON.parse(formInstance.flowConfig);
+    const nextNode = flowConfig.nodes[currentStepIndex + 1];
 
     try {
       await formApi.updateFormInstance(formInstance.id, {
@@ -82,13 +86,21 @@ const FormDetail: React.FC = () => {
   }
 
   const currentStep = getCurrentStep();
-  const isLastStep = currentStep === formInstance.formSpec.flowConfig.nodes.length - 1;
+  const flowConfig: FlowConfig = JSON.parse(formInstance.flowConfig);
+  const isLastStep = currentStep === flowConfig.nodes.length - 1;
+  const formConfig: FormConfig = JSON.parse(formInstance.formConfig);
+
+  // 创建字段映射
+  const fieldMap = formConfig.fields.reduce<Record<string, FormField>>((acc, field) => {
+    acc[field.id] = field;
+    return acc;
+  }, {});
 
   return (
-    <Card title={formInstance.formSpec.name}>
+    <Card title={formInstance.formName}>
       <Descriptions bordered column={2}>
-        <Descriptions.Item label="提交人">{formInstance.submitter}</Descriptions.Item>
-        <Descriptions.Item label="处理人">{formInstance.handler}</Descriptions.Item>
+        <Descriptions.Item label="提交人">{formInstance.creatorName}</Descriptions.Item>
+        <Descriptions.Item label="处理人">{formInstance.handler || '-'}</Descriptions.Item>
         <Descriptions.Item label="创建时间">
           {new Date(formInstance.createdAt).toLocaleString()}
         </Descriptions.Item>
@@ -101,19 +113,18 @@ const FormDetail: React.FC = () => {
 
       <Steps
         current={currentStep}
-        items={formInstance.formSpec.flowConfig.nodes.map(node => ({
+        items={flowConfig.nodes.map((node) => ({
           title: node.name,
           description: node.handler,
         }))}
-        style={{ marginBottom: 24 }}
       />
 
-      <Divider>表单内容</Divider>
+      <Divider>表单数据</Divider>
 
       <Descriptions bordered column={1}>
-        {formInstance.formSpec.formConfig.fields.map(field => (
-          <Descriptions.Item key={field.id} label={field.label}>
-            {formInstance.formData[field.id]}
+        {Object.entries(formInstance.formData).map(([key, value]) => (
+          <Descriptions.Item key={key} label={fieldMap[key]?.label || key}>
+            {value}
           </Descriptions.Item>
         ))}
       </Descriptions>
@@ -121,26 +132,26 @@ const FormDetail: React.FC = () => {
       {!isLastStep && (
         <>
           <Divider>处理意见</Divider>
-          
-          <Form form={form} onFinish={handleSubmit}>
-            <Form.Item
-              name="remarks"
-              rules={[{ required: true, message: '请输入处理意见' }]}
-            >
-              <TextArea rows={4} placeholder="请输入处理意见" />
-            </Form.Item>
-
-            <Form.Item>
-              <Space>
-                <Button type="primary" htmlType="submit">
-                  提交
-                </Button>
-                <Button onClick={() => navigate('/forms')}>
-                  返回
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
+          {user?.username === formInstance.handler ? (
+            <Form form={form} onFinish={handleSubmit}>
+              <Form.Item
+                name="remarks"
+                rules={[{ required: true, message: '请输入处理意见' }]}
+              >
+                <TextArea rows={4} placeholder="请输入处理意见" />
+              </Form.Item>
+              <Form.Item>
+                <Space>
+                  <Button type="primary" htmlType="submit">
+                    提交
+                  </Button>
+                  <Button onClick={() => navigate('/forms')}>返回</Button>
+                </Space>
+              </Form.Item>
+            </Form>
+          ) : (
+            <Button onClick={() => navigate('/forms')}>返回</Button>
+          )}
         </>
       )}
     </Card>

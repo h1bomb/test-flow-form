@@ -1,6 +1,8 @@
 import Koa from 'koa';
 import Router from 'koa-router';
 import bodyParser from 'koa-bodyparser';
+import cors from '@koa/cors';
+import session from 'koa-session';
 import { drizzle } from 'drizzle-orm/mysql2';
 import mysql from 'mysql2/promise';
 import { createFormController } from './controllers/form.controller';
@@ -8,11 +10,34 @@ import { createUserController } from './controllers/user.controller';
 import { FormService } from './services/form.service';
 import { UserService } from './services/user.service';
 import config from '../drizzle.config';
+
 const app = new Koa();
 const router = new Router();
 
+// Session configuration
+app.keys = ['your-session-secret']; // 请更换为安全的密钥
+const SESSION_CONFIG = {
+  key: 'flow.sess',
+  maxAge: 86400000, // 一天
+  autoCommit: true,
+  overwrite: true,
+  httpOnly: true,
+  signed: true,
+  rolling: false,
+  renew: false,
+  secure: false, // 开发环境设置为 false
+  sameSite: 'lax' as const, // 允许跨站点 cookie
+};
+
 // Middleware
 app.use(bodyParser());
+app.use(session(SESSION_CONFIG, app));
+app.use(cors({
+  origin: 'http://localhost:5173', // 允许的前端域名
+  credentials: true, // 允许携带认证信息
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
+}));
 
 // Database connection
 const setupDatabase = async () => {

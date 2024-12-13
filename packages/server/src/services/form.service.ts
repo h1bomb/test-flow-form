@@ -1,47 +1,9 @@
-import { eq, or } from 'drizzle-orm';
 import { MySql2Database } from 'drizzle-orm/mysql2';
+import { eq, and } from 'drizzle-orm';
 import { formSpecs, formInstances, users } from '../schema';
+import { NewFormSpec, NewFormInstance, UpdateFormInstance } from '../types';
 
-interface FormSpec {
-  id: number;
-  name: string;
-  formConfig: string;
-  flowConfig: string;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-}
-
-interface FormInstance {
-  id: number;
-  userId: number;
-  formSpecId: number;
-  currentStatus: string;
-  formData: string;
-  flowRemark: string | null;
-  createdAt: Date | null;
-  updatedAt: Date | null;
-}
-
-interface FormSpecCreateBody {
-  name: string;
-  formConfig: string;
-  flowConfig: string;
-}
-
-interface FormInstanceCreateBody {
-  userId: number;
-  formSpecId: number;
-  currentStatus: string;
-  formData: string;
-  flowRemark?: string;
-}
-
-interface FormInstanceUpdateBody {
-  currentStatus?: string;
-  flowRemark?: string;
-}
-
-interface QueryFormInstancesParams {
+interface FormInstanceQuery {
   creatorId?: number;
   handlerId?: number;
 }
@@ -49,127 +11,281 @@ interface QueryFormInstancesParams {
 export class FormService {
   constructor(private db: MySql2Database) {}
 
-  async saveFormSpec(data: FormSpecCreateBody): Promise<FormSpec> {
-    const [result] = await this.db.insert(formSpecs).values({
-      name: data.name,
-      formConfig: data.formConfig,
-      flowConfig: data.flowConfig,
-    });
-
-    // Fetch and return the created record
-    const [createdSpec] = await this.db
-      .select()
-      .from(formSpecs)
-      .where(eq(formSpecs.id, result.insertId as number));
-
-    return createdSpec;
-  }
-
-  async saveFormInstance(data: FormInstanceCreateBody): Promise<FormInstance> {
+  // 保存表单规格
+  async saveFormSpec(data: NewFormSpec) {
     try {
-      // Verify that the form spec exists
-      const [formSpec] = await this.db
+      const [result] = await this.db.insert(formSpecs).values(data);
+      if (!result.insertId) {
+        throw new Error('Failed to insert form specification');
+      }
+
+      // 获取刚插入的记录
+      const [spec] = await this.db
         .select()
         .from(formSpecs)
-        .where(eq(formSpecs.id, data.formSpecId));
+        .where(eq(formSpecs.id, result.insertId));
 
-      if (!formSpec) {
-        throw new Error(`Form spec with id ${data.formSpecId} not found`);
+      if (!spec) {
+        throw new Error('Failed to retrieve saved form specification');
       }
 
-      // Verify that the user exists
-      const [user] = await this.db
-        .select()
-        .from(users)
-        .where(eq(users.id, data.userId));
-
-      if (!user) {
-        throw new Error(`User with id ${data.userId} not found`);
-      }
-
-      const [result] = await this.db.insert(formInstances).values({
-        userId: data.userId,
-        formSpecId: data.formSpecId,
-        currentStatus: data.currentStatus,
-        formData: JSON.stringify(data.formData),
-        flowRemark: data.flowRemark || null,
-      });
-
-      // Fetch and return the created record
-      const [createdInstance] = await this.db
-        .select()
-        .from(formInstances)
-        .where(eq(formInstances.id, result.insertId as number));
-
-      return createdInstance;
+      return {
+        ...spec,
+        formConfig: JSON.parse(spec.formConfig),
+        flowConfig: JSON.parse(spec.flowConfig),
+      };
     } catch (error) {
-      console.error('Error saving form instance:', error);
-      throw error;
+      console.error('Error saving form spec:', error);
+      throw new Error('Failed to save form specification');
     }
   }
 
-  async updateFormInstance(id: number, data: FormInstanceUpdateBody): Promise<FormInstance> {
+  // 获取所有表单规格
+  async getFormSpecs() {
     try {
-      // Verify that the form instance exists
-      const [existingInstance] = await this.db
+      const specs = await this.db.select().from(formSpecs);
+      return specs.map(spec => ({
+        ...spec,
+        formConfig: JSON.parse(spec.formConfig),
+        flowConfig: JSON.parse(spec.flowConfig),
+      }));
+    } catch (error) {
+      console.error('Error getting form specs:', error);
+      throw new Error('Failed to get form specifications');
+    }
+  }
+
+  // 获取单个表单规格
+  async getFormSpec(id: number) {
+    try {
+      const [spec] = await this.db
+        .select()
+        .from(formSpecs)
+        .where(eq(formSpecs.id, id));
+
+      if (!spec) {
+        return null;
+      }
+
+      return {
+        ...spec,
+        formConfig: JSON.parse(spec.formConfig),
+        flowConfig: JSON.parse(spec.flowConfig),
+      };
+    } catch (error) {
+      console.error('Error getting form spec:', error);
+      throw new Error('Failed to get form specification');
+    }
+  }
+
+  // 保存表单实例
+  async saveFormInstance(data: NewFormInstance) {
+    try {
+      // 检查表单规格是否存在
+      const formSpec = await this.db
+        .select()
+        .from(formSpecs)
+        .where(eq(formSpecs.id, data.formSpecId))
+        .limit(1);
+
+      if (!formSpec.length) {
+        throw new Error('Form specification not found');
+      }
+
+      const [result] = await this.db.insert(formInstances).values(data);
+      if (!result.insertId) {
+        throw new Error('Failed to insert form instance');
+      }
+
+      // 获取刚插入的记录
+      const [instance] = await this.db
+        .select({
+          id: formInstances.id,
+          formSpecId: formInstances.formSpecId,
+          userId: formInstances.userId,
+          currentStatus: formInstances.currentStatus,
+          formData: formInstances.formData,
+          flowRemark: formInstances.flowRemark,
+          createdAt: formInstances.createdAt,
+          updatedAt: formInstances.updatedAt,
+          formName: formSpecs.name,
+          formConfig: formSpecs.formConfig,
+          flowConfig: formSpecs.flowConfig,
+          creatorName: users.username,
+        })
+        .from(formInstances)
+        .leftJoin(formSpecs, eq(formInstances.formSpecId, formSpecs.id))
+        .leftJoin(users, eq(formInstances.userId, users.id))
+        .where(eq(formInstances.id, result.insertId));
+
+      if (!instance) {
+        throw new Error('Failed to retrieve saved form instance');
+      }
+
+      const flowConfig = JSON.parse(instance.flowConfig ?? '{ "nodes": [] }');
+      const currentNode = flowConfig.nodes.find(
+        (node: any) => node.id === instance.currentStatus
+      );
+
+      return {
+        ...instance,
+        formData: instance.formData ? JSON.parse(instance.formData) : {},
+        currentNodeName: currentNode?.name || instance.currentStatus,
+        handler: currentNode?.handler,
+      };
+    } catch (error) {
+      console.error('Error saving form instance:', error);
+      throw new Error('Failed to save form instance');
+    }
+  }
+
+  // 更新表单实例
+  async updateFormInstance(id: number, data: UpdateFormInstance) {
+    try {
+      const [instance] = await this.db
         .select()
         .from(formInstances)
         .where(eq(formInstances.id, id));
 
-      if (!existingInstance) {
-        throw new Error(`Form instance with id ${id} not found`);
+      if (!instance) {
+        throw new Error('Form instance not found');
       }
-
-      // Only update fields that are provided
-      const updateData: { currentStatus?: string; flowRemark?: string } = {};
-      if (data.currentStatus !== undefined) updateData.currentStatus = data.currentStatus;
-      if (data.flowRemark !== undefined) updateData.flowRemark = data.flowRemark;
 
       await this.db
         .update(formInstances)
-        .set(updateData)
+        .set(data)
         .where(eq(formInstances.id, id));
 
       const [updatedInstance] = await this.db
-        .select()
+        .select({
+          id: formInstances.id,
+          formSpecId: formInstances.formSpecId,
+          userId: formInstances.userId,
+          currentStatus: formInstances.currentStatus,
+          formData: formInstances.formData,
+          flowRemark: formInstances.flowRemark,
+          createdAt: formInstances.createdAt,
+          updatedAt: formInstances.updatedAt,
+          formName: formSpecs.name,
+          formConfig: formSpecs.formConfig,
+          flowConfig: formSpecs.flowConfig,
+          creatorName: users.username,
+        })
         .from(formInstances)
+        .leftJoin(formSpecs, eq(formInstances.formSpecId, formSpecs.id))
+        .leftJoin(users, eq(formInstances.userId, users.id))
         .where(eq(formInstances.id, id));
 
-      if (!updatedInstance) {
-        throw new Error('Failed to update form instance');
-      }
+        const flowConfig = JSON.parse(updatedInstance.flowConfig ?? '{ "nodes": [] }');
+      const currentNode = flowConfig.nodes.find(
+        (node: any) => node.id === updatedInstance.currentStatus
+      );
 
-      return updatedInstance;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to update form instance: ${error.message}`);
-      }
-      throw new Error('Failed to update form instance: Unknown error');
+      return {
+        ...updatedInstance,
+        formData: updatedInstance.formData ? JSON.parse(updatedInstance.formData) : {},
+        currentNodeName: currentNode?.name || updatedInstance.currentStatus,
+        handler: currentNode?.handler,
+      };
+    } catch (error) {
+      console.error('Error updating form instance:', error);
+      throw new Error('Failed to update form instance');
     }
   }
 
-  async queryFormInstances(params: QueryFormInstancesParams) {
+  // 查询表单实例
+  async queryFormInstances(query: FormInstanceQuery) {
     try {
-      const query = this.db.select().from(formInstances);
-      
-      if (params.creatorId !== undefined || params.handlerId !== undefined) {
-        const conditions = [];
-        if (params.creatorId !== undefined) {
-          conditions.push(eq(formInstances.userId, params.creatorId));
-        }
-        if (params.handlerId !== undefined) {
-          conditions.push(eq(formInstances.userId, params.handlerId));
-        }
-        query.where(conditions.length === 1 ? conditions[0] : or(...conditions));
+      const conditions = [];
+
+      if (query.creatorId) {
+        conditions.push(eq(formInstances.userId, query.creatorId));
       }
-      
-      const results = await query;
-      return results;
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        throw new Error(`Failed to query form instances: ${error.message}`);
+
+      if (query.handlerId) {
+        conditions.push(eq(formInstances.userId, query.handlerId));
       }
+
+      const instances = await this.db
+        .select({
+          id: formInstances.id,
+          formSpecId: formInstances.formSpecId,
+          userId: formInstances.userId,
+          currentStatus: formInstances.currentStatus,
+          formData: formInstances.formData,
+          flowRemark: formInstances.flowRemark,
+          createdAt: formInstances.createdAt,
+          updatedAt: formInstances.updatedAt,
+          formName: formSpecs.name,
+          formConfig: formSpecs.formConfig,
+          flowConfig: formSpecs.flowConfig,
+          creatorName: users.username,
+        })
+        .from(formInstances)
+        .leftJoin(formSpecs, eq(formInstances.formSpecId, formSpecs.id))
+        .leftJoin(users, eq(formInstances.userId, users.id))
+        .where(conditions.length ? and(...conditions) : undefined);
+
+      return instances.map(instance => {
+        const flowConfig = JSON.parse(instance.flowConfig ?? '{ "nodes": [] }');
+        const currentNode = flowConfig.nodes.find(
+          (node: any) => node.id === instance.currentStatus
+        );
+
+        return {
+          ...instance,
+          formData: instance.formData ? JSON.parse(instance.formData) : {},
+          currentNodeName: currentNode?.name || instance.currentStatus,
+          handler: currentNode?.handler,
+        };
+      });
+    } catch (error) {
+      console.error('Error querying form instances:', error);
       throw new Error('Failed to query form instances: Unknown error');
+    }
+  }
+
+  // 获取单个表单实例
+  async getFormInstance(id: number) {
+    try {
+      const [instance] = await this.db
+        .select({
+          id: formInstances.id,
+          formSpecId: formInstances.formSpecId,
+          userId: formInstances.userId,
+          currentStatus: formInstances.currentStatus,
+          formData: formInstances.formData,
+          flowRemark: formInstances.flowRemark,
+          createdAt: formInstances.createdAt,
+          updatedAt: formInstances.updatedAt,
+          formName: formSpecs.name,
+          formConfig: formSpecs.formConfig,
+          flowConfig: formSpecs.flowConfig,
+          creatorName: users.username,
+        })
+        .from(formInstances)
+        .leftJoin(formSpecs, eq(formInstances.formSpecId, formSpecs.id))
+        .leftJoin(users, eq(formInstances.userId, users.id))
+        .where(eq(formInstances.id, id));
+
+      if (!instance) {
+        return null;
+      }
+
+      const flowConfig = JSON.parse(instance.flowConfig ?? '{ "nodes": [] }');
+      const currentNode = flowConfig.nodes.find(
+        (node: any) => node.id === instance.currentStatus
+      );
+
+      return {
+        ...instance,
+        formData: instance.formData ? JSON.parse(instance.formData) : {},
+        currentNodeName: currentNode?.name || instance.currentStatus,
+        handler: currentNode?.handler,
+      };
+    } catch (error) {
+      console.error('Error getting form instance:', error);
+      throw new Error('Failed to get form instance');
     }
   }
 }
