@@ -63,21 +63,6 @@ importers:
       '@koa/router':
         specifier: ^12.0.1
         version: 12.0.2
-      '@types/bcryptjs':
-        specifier: ^2.4.6
-        version: 2.4.6
-      '@types/koa':
-        specifier: ^2.13.12
-        version: 2.15.0
-      '@types/koa-bodyparser':
-        specifier: ^4.3.12
-        version: 4.3.12
-      '@types/koa-router':
-        specifier: ^7.4.8
-        version: 7.4.8
-      '@types/koa__cors':
-        specifier: ^5.0.0
-        version: 5.0.0
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -103,9 +88,24 @@ importers:
         specifier: ^5.3.3
         version: 5.7.2
     devDependencies:
+      '@types/bcryptjs':
+        specifier: ^2.4.6
+        version: 2.4.6
+      '@types/koa':
+        specifier: ^2.13.12
+        version: 2.15.0
+      '@types/koa-bodyparser':
+        specifier: ^4.3.12
+        version: 4.3.12
+      '@types/koa-router':
+        specifier: ^7.4.8
+        version: 7.4.8
       '@types/koa-session':
         specifier: ^6.4.5
         version: 6.4.5
+      '@types/koa__cors':
+        specifier: ^5.0.0
+        version: 5.0.0
       '@types/node':
         specifier: ^20.10.4
         version: 20.17.10
@@ -139,9 +139,6 @@ importers:
       '@faker-js/faker':
         specifier: ^8.3.1
         version: 8.4.1
-      axios:
-        specifier: ^1.6.2
-        version: 1.7.9
     devDependencies:
       '@playwright/test':
         specifier: ^1.40.1
@@ -149,9 +146,9 @@ importers:
       '@types/node':
         specifier: ^20.10.4
         version: 20.17.10
-      tsx:
-        specifier: ^4.6.2
-        version: 4.19.2
+      ts-node:
+        specifier: ^10.9.2
+        version: 10.9.2(@types/node@20.17.10)(typescript@5.7.2)
       typescript:
         specifier: ^5.3.3
         version: 5.7.2

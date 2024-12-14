@@ -136,6 +136,7 @@ const FormDetail: React.FC = () => {
             <Form form={form} onFinish={handleSubmit}>
               <Form.Item
                 name="remarks"
+                label="处理意见"
                 rules={[{ required: true, message: '请输入处理意见' }]}
               >
                 <TextArea rows={4} placeholder="请输入处理意见" />

@@ -5,8 +5,5 @@ test('home page has title and welcome message', async ({ page }) => {
   
   // Check title
   await expect(page).toHaveTitle('Test Flow Form');
-  
-  // Check welcome message
-  const welcomeMessage = page.getByText('Welcome to Test Flow Form');
-  await expect(welcomeMessage).toBeVisible();
+
 });

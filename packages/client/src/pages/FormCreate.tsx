@@ -68,9 +68,9 @@ const FormCreate: React.FC = () => {
         flowRemarks: '',
       };
 
-      await formApi.createFormInstance(formInstance);
+      const response = await formApi.createFormInstance(formInstance);
       message.success('表单提交成功');
-      navigate('/forms');
+      navigate(`/forms/${response.id}`);
     } catch (error: any) {
       if (error.response?.status === 401) {
         message.error('请先登录');

@@ -1,19 +1,14 @@
 {
   "users": [
     {
-      "username": "user1",
-      "password": "password123",
+      "username": "test",
+      "password": "123321",
+      "role": "approver"
+    },
+    {
+      "username": "test2",
+      "password": "123321",  
       "role": "submitter"
-    },
-    {
-      "username": "user2",
-      "password": "password123",
-      "role": "approver"
-    },
-    {
-      "username": "user3",
-      "password": "password123",
-      "role": "approver"
     }
   ]
 }

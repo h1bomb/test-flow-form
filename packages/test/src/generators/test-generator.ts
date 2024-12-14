@@ -1,10 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { fileURLToPath } from 'url';
 import { faker } from '@faker-js/faker';
+import type { FormSpecification } from '../../../client/src/types/form';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 interface FormField {
   id: string;
@@ -26,13 +24,6 @@ interface FormConfig {
 
 interface FlowConfig {
   nodes: FlowNode[];
-}
-
-interface FormSpecification {
-  id: number;
-  name: string;
-  formConfig: FormConfig;
-  flowConfig: FlowConfig;
 }
 
 interface TestUser {
@@ -104,7 +95,6 @@ export class TestGenerator {
   generateTestFile(testCase: TestCase) {
     const testContent = `
 import { test, expect } from '@playwright/test';
-import { join } from 'path';
 
 const testCase = ${JSON.stringify(testCase, null, 2)};
 
@@ -114,8 +104,9 @@ test('Form submission and approval flow', async ({ page }) => {
     await page.goto('/login');
     await page.getByLabel('用户名').fill(testCase.submitter.username);
     await page.getByLabel('密码').fill(testCase.submitter.password);
-    await page.getByRole('button', { name: '登录' }).click();
-    await expect(page).toHaveURL('/');
+    await page.getByRole('button', { name: '登 录' }).click();
+    // 等待导航完成
+    await expect(page).toHaveURL('/', {timeout: 10000});
   });
 
   // 2. 创建表单实例
@@ -131,7 +122,7 @@ test('Form submission and approval flow', async ({ page }) => {
       }
     }
 
-    await page.getByRole('button', { name: '提交表单' }).click();
+    await page.getByRole('button', { name: '提交' }).click();
     
     // 获取表单实例ID
     const url = page.url();
@@ -149,7 +140,9 @@ test('Form submission and approval flow', async ({ page }) => {
       await page.goto('/login');
       await page.getByLabel('用户名').fill(approver.username);
       await page.getByLabel('密码').fill(approver.password);
-      await page.getByRole('button', { name: '登录' }).click();
+      await page.getByRole('button', { name: '登 录' }).click();
+      // 等待导航完成
+      await expect(page).toHaveURL('/', {timeout: 10000});
       
       // 打开表单详情
       await page.goto(\`/forms/\${formInstanceId}\`);

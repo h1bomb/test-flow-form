@@ -1,22 +1,22 @@
 {
-  "name": "test-flow-form-test",
+  "name": "@test-flow-form/test",
   "version": "1.0.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "test": "playwright test",
+    "test": "playwright test --ui",
     "test:ui": "playwright test --ui",
-    "test:generate": "tsx src/generate-tests.ts",
+    "test:generate": "ts-node src/generate-tests.ts",
+    "test:generate:all": "ts-node src/generate-tests.ts --all",
+    "test:generate:help": "ts-node src/generate-tests.ts --help",
     "test:report": "playwright show-report"
   },
   "dependencies": {
-    "@faker-js/faker": "^8.3.1",
-    "axios": "^1.6.2"
+    "@faker-js/faker": "^8.3.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.1",
     "@types/node": "^20.10.4",
-    "tsx": "^4.6.2",
+    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }

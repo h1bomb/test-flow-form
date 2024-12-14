@@ -75,6 +75,7 @@ export function createUserController(userService: UserService) {
         },
       };
     } catch (error) {
+      console.error(error);
       ctx.status = 500;
       ctx.body = { error: "登录失败" };
     }
