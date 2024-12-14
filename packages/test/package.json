@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "test": "playwright test --ui",
+    "test": "playwright test --headed",
     "test:ui": "playwright test --ui",
     "test:generate": "ts-node src/generate-tests.ts",
     "test:generate:all": "ts-node src/generate-tests.ts --all",

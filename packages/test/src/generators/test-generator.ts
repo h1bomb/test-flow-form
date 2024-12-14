@@ -122,12 +122,13 @@ test('Form submission and approval flow', async ({ page }) => {
       }
     }
 
-    await page.getByRole('button', { name: '提交' }).click();
-    
+    await page.getByRole('button', { name: '提 交' }).click();
+    // 等待导航完成
+    await page.waitForURL(/\\\/forms\\\/\\d+/, { timeout: 10000 });
     // 获取表单实例ID
     const url = page.url();
     formInstanceId = url.split('/').pop()!;
-    await expect(page).toHaveURL('/forms');
+    await expect(page).toHaveURL(\`/forms/\${formInstanceId}\`, {timeout: 10000});
   });
 
   // 3. 审批流程
@@ -149,7 +150,7 @@ test('Form submission and approval flow', async ({ page }) => {
       
       // 提交审批
       await page.getByRole('textbox', { name: '处理意见' }).fill('Approved');
-      await page.getByRole('button', { name: '提交' }).click();
+      await page.getByRole('button', { name: '提 交' }).click();
       
       await expect(page).toHaveURL('/forms');
     });

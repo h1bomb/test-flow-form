@@ -58,8 +58,8 @@ const testCase = {
     }
   ],
   "testData": {
-    "ce759f35-e859-4ac5-aeae-a7a6945f74b4": "vergo damno thymbra",
-    "a772b9c0-42bd-494e-8721-298aca50896b": "Theatrum architecto officiis adeo desolo vado culpa pectus. Bene adulescens paens thesis amoveo. Desino uxor necessitatibus tabernus sustineo aggredior crudelis attero."
+    "ce759f35-e859-4ac5-aeae-a7a6945f74b4": "via sapiente defessus",
+    "a772b9c0-42bd-494e-8721-298aca50896b": "Tremo ullam asporto tubineus depopulo cado vulgivagus. Ultra aveho vinculum cum capto vito suus utrum. Chirographum sufficio turba verus copia ara averto stillicidium solium."
   }
 };
 
@@ -87,12 +87,13 @@ test('Form submission and approval flow', async ({ page }) => {
       }
     }
 
-    await page.getByRole('button', { name: '提交' }).click();
-    
+    await page.getByRole('button', { name: '提 交' }).click();
+    // 等待导航完成
+    await page.waitForURL(/\/forms\/\d+/, { timeout: 10000 });
     // 获取表单实例ID
     const url = page.url();
     formInstanceId = url.split('/').pop()!;
-    await expect(page).toHaveURL('/forms');
+    await expect(page).toHaveURL(`/forms/${formInstanceId}`, {timeout: 10000});
   });
 
   // 3. 审批流程
@@ -114,7 +115,7 @@ test('Form submission and approval flow', async ({ page }) => {
       
       // 提交审批
       await page.getByRole('textbox', { name: '处理意见' }).fill('Approved');
-      await page.getByRole('button', { name: '提交' }).click();
+      await page.getByRole('button', { name: '提 交' }).click();
       
       await expect(page).toHaveURL('/forms');
     });
