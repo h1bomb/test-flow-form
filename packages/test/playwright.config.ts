@@ -10,7 +10,10 @@ export default defineConfig({
   reporter: 'html',
   use: {
     baseURL: 'http://localhost:5173',
-    trace: 'on-first-retry',
+    trace: 'on',
+    launchOptions: {
+      slowMo: 500, // 以毫秒为单位，操作延迟 500ms
+    },
   },
   projects: [
     {

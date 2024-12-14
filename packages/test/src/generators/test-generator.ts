@@ -106,7 +106,7 @@ test('Form submission and approval flow', async ({ page }) => {
     await page.getByLabel('密码').fill(testCase.submitter.password);
     await page.getByRole('button', { name: '登 录' }).click();
     // 等待导航完成
-    await expect(page).toHaveURL('/', {timeout: 10000});
+    await expect(page).toHaveURL('/forms', {timeout: 10000});
   });
 
   // 2. 创建表单实例
@@ -143,7 +143,7 @@ test('Form submission and approval flow', async ({ page }) => {
       await page.getByLabel('密码').fill(approver.password);
       await page.getByRole('button', { name: '登 录' }).click();
       // 等待导航完成
-      await expect(page).toHaveURL('/', {timeout: 10000});
+      await expect(page).toHaveURL('/forms', {timeout: 10000});
       
       // 打开表单详情
       await page.goto(\`/forms/\${formInstanceId}\`);
@@ -152,7 +152,7 @@ test('Form submission and approval flow', async ({ page }) => {
       await page.getByRole('textbox', { name: '处理意见' }).fill('Approved');
       await page.getByRole('button', { name: '提 交' }).click();
       
-      await expect(page).toHaveURL('/forms');
+      await expect(page).toHaveURL('/forms', {timeout: 10000});
     });
   }
 });

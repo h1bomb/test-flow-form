@@ -2,22 +2,22 @@
 import { test, expect } from '@playwright/test';
 
 const testCase = {
-  "name": "Test case for form: 报销申请",
+  "name": "Test case for form: 测试表单",
   "formSpec": {
-    "id": 1,
-    "name": "报销申请",
+    "id": 2,
+    "name": "测试表单",
     "formConfig": {
       "fields": [
         {
-          "id": "ce759f35-e859-4ac5-aeae-a7a6945f74b4",
+          "id": "4ae2cbf8-0ac5-474e-8593-f47e0ce8746c",
           "type": "input",
-          "label": "费用名称",
+          "label": "测试1",
           "required": true
         },
         {
-          "id": "a772b9c0-42bd-494e-8721-298aca50896b",
+          "id": "bffad9fd-6e69-44a8-a0e4-dcb4a6904eec",
           "type": "textarea",
-          "label": "理由",
+          "label": "测试2",
           "required": false
         }
       ]
@@ -31,7 +31,7 @@ const testCase = {
         },
         {
           "id": "process",
-          "name": "同意完成",
+          "name": "处理",
           "type": "process",
           "handler": "test"
         },
@@ -42,8 +42,8 @@ const testCase = {
         }
       ]
     },
-    "updatedAt": "2024-12-13T12:11:45.000Z",
-    "createdAt": "2024-12-13T12:11:45.000Z"
+    "updatedAt": "2024-12-14T15:59:34.000Z",
+    "createdAt": "2024-12-14T15:48:04.000Z"
   },
   "submitter": {
     "username": "test2",
@@ -58,8 +58,8 @@ const testCase = {
     }
   ],
   "testData": {
-    "ce759f35-e859-4ac5-aeae-a7a6945f74b4": "corrigo similique demo",
-    "a772b9c0-42bd-494e-8721-298aca50896b": "Cubitum cubitum celer astrum caries. Condico amoveo utor iusto alveus terminatio aequitas quibusdam textor. Via verus facere."
+    "4ae2cbf8-0ac5-474e-8593-f47e0ce8746c": "asper cur sollers",
+    "bffad9fd-6e69-44a8-a0e4-dcb4a6904eec": "Somniculosus illum adflicto censura utpote. Arbitro crux cunae sonitus corroboro. Veritatis tabesco numquam."
   }
 };
 
