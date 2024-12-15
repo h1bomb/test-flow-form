@@ -11,21 +11,6 @@ interface FormField {
   required: boolean;
 }
 
-interface FlowNode {
-  id: string;
-  type: string;
-  name: string;
-  handler: string;
-}
-
-interface FormConfig {
-  fields: FormField[];
-}
-
-interface FlowConfig {
-  nodes: FlowNode[];
-}
-
 interface TestUser {
   username: string;
   password: string;
