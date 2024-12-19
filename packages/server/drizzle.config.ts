@@ -1,13 +1,10 @@
-import type { Config } from 'drizzle-kit';
-
-export default {
-  schema: './src/schema.ts',
+import 'dotenv/config';
+import { defineConfig } from 'drizzle-kit';
+export default defineConfig({
   out: './drizzle',
-  driver: 'mysql2',
+  schema: './src/db/schema.ts',
+  dialect: 'mysql',
   dbCredentials: {
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'test_flow_form',
+    url: process.env.DATABASE_URL!,
   },
-} satisfies Config;
+});

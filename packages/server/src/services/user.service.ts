@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { MySql2Database } from 'drizzle-orm/mysql2';
-import { users } from '../schema';
+import { users } from '../db/schema';
 import crypto from 'crypto';
 
 interface User {

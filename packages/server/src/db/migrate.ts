@@ -1,14 +1,12 @@
+import 'dotenv/config';
+
 import { drizzle } from 'drizzle-orm/mysql2';
 import { migrate } from 'drizzle-orm/mysql2/migrator';
 import mysql from 'mysql2/promise';
-import config from '../../drizzle.config';
 
 async function runMigrations() {
   // Database connection configuration using drizzle config
-  const connection = await mysql.createConnection({
-    ...config.dbCredentials,
-    multipleStatements: true,
-  });
+  const connection = await mysql.createConnection(process.env.DATABASE_URL!);
 
   const db = drizzle(connection);
 

@@ -17,12 +17,13 @@
     "@koa/cors": "^5.0.0",
     "@koa/router": "^12.0.1",
     "bcryptjs": "^2.4.3",
-    "drizzle-orm": "^0.29.1",
+    "dotenv": "^16.4.7",
+    "drizzle-orm": "^0.38.2",
     "koa": "^2.14.2",
     "koa-bodyparser": "^4.4.1",
     "koa-router": "^12.0.1",
     "koa-session": "^6.4.0",
-    "mysql2": "^3.6.5",
+    "mysql2": "^3.11.5",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
@@ -30,16 +31,16 @@
     "@types/koa": "^2.13.12",
     "@types/koa-bodyparser": "^4.3.12",
     "@types/koa-router": "^7.4.8",
-    "@types/koa__cors": "^5.0.0",
     "@types/koa-session": "^6.4.5",
+    "@types/koa__cors": "^5.0.0",
     "@types/node": "^20.10.4",
     "@types/supertest": "^2.0.16",
     "@vitest/coverage-v8": "^1.0.4",
-    "drizzle-kit": "^0.20.6",
+    "drizzle-kit": "^0.30.1",
     "nodemon": "^3.0.2",
     "supertest": "^6.3.3",
     "ts-node": "^10.9.2",
-    "tsx": "^4.6.2",
+    "tsx": "^4.19.2",
     "vitest": "^1.0.4"
   }
 }

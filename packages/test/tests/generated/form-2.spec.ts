@@ -2,23 +2,23 @@
 import { test, expect } from '@playwright/test';
 
 const testCase = {
-  "name": "Test case for form: 测试表单",
+  "name": "Test case for form: 出差申请",
   "formSpec": {
     "id": 2,
-    "name": "测试表单",
+    "name": "出差申请",
     "formConfig": {
       "fields": [
         {
-          "id": "4ae2cbf8-0ac5-474e-8593-f47e0ce8746c",
+          "id": "1b420e8c-9e5e-415a-9e5a-f3f297f5ad0b",
           "type": "input",
-          "label": "测试1",
+          "label": "目的地",
           "required": true
         },
         {
-          "id": "bffad9fd-6e69-44a8-a0e4-dcb4a6904eec",
+          "id": "362628b6-a322-4793-83a1-27568e96cce6",
           "type": "textarea",
-          "label": "测试2",
-          "required": false
+          "label": "事由",
+          "required": true
         }
       ]
     },
@@ -42,8 +42,8 @@ const testCase = {
         }
       ]
     },
-    "updatedAt": "2024-12-14T15:59:34.000Z",
-    "createdAt": "2024-12-14T15:48:04.000Z"
+    "updatedAt": "2024-12-19T08:27:26.000Z",
+    "createdAt": "2024-12-19T08:27:26.000Z"
   },
   "submitter": {
     "username": "test2",
@@ -58,8 +58,8 @@ const testCase = {
     }
   ],
   "testData": {
-    "4ae2cbf8-0ac5-474e-8593-f47e0ce8746c": "asper cur sollers",
-    "bffad9fd-6e69-44a8-a0e4-dcb4a6904eec": "Somniculosus illum adflicto censura utpote. Arbitro crux cunae sonitus corroboro. Veritatis tabesco numquam."
+    "1b420e8c-9e5e-415a-9e5a-f3f297f5ad0b": "strenuus amiculum verto",
+    "362628b6-a322-4793-83a1-27568e96cce6": "Celer corona commemoro conculco ara. Alii quidem facere cruentus accusamus succedo porro. Culpo comprehendo tempora valens virga una inflammatio fuga."
   }
 };
 

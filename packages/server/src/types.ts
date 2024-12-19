@@ -1,5 +1,5 @@
 import { InferModel } from 'drizzle-orm';
-import { formSpecs, formInstances, users } from './schema';
+import { formSpecs, formInstances, users } from './db/schema';
 import { DefaultState, DefaultContext } from 'koa';
 
 // 用户相关类型

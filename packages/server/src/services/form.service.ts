@@ -1,6 +1,6 @@
 import { MySql2Database } from 'drizzle-orm/mysql2';
 import { eq, and } from 'drizzle-orm';
-import { formSpecs, formInstances, users } from '../schema';
+import { formSpecs, formInstances, users } from '../db/schema';
 import { NewFormSpec, NewFormInstance, UpdateFormInstance } from '../types';
 
 interface FormInstanceQuery {

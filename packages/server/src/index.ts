@@ -3,13 +3,11 @@ import Router from 'koa-router';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 import session from 'koa-session';
-import { drizzle } from 'drizzle-orm/mysql2';
-import mysql from 'mysql2/promise';
 import { createFormController } from './controllers/form.controller';
 import { createUserController } from './controllers/user.controller';
 import { FormService } from './services/form.service';
 import { UserService } from './services/user.service';
-import config from '../drizzle.config';
+import { db } from './db';
 
 const app = new Koa();
 const router = new Router();
@@ -39,17 +37,9 @@ app.use(cors({
   allowHeaders: ['Content-Type', 'Authorization', 'Accept'],
 }));
 
-// Database connection
-const setupDatabase = async () => {
-  const connection = await mysql.createConnection(config.dbCredentials);
-
-  return drizzle(connection);
-};
 
 // Initialize services and controllers
-const initializeApp = async () => {
-  const db = await setupDatabase();
-  
+const initializeApp = async () => {  
   // Initialize services
   const formService = new FormService(db);
   const userService = new UserService(db);

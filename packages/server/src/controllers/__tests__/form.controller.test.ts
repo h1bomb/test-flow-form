@@ -1,3 +1,5 @@
+import 'dotenv/config';
+
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { createFormController } from '../form.controller';
 import { FormService } from '../../services/form.service';
@@ -6,9 +8,8 @@ import bodyParser from 'koa-bodyparser';
 import request from 'supertest';
 import mysql from 'mysql2/promise';
 import { drizzle } from 'drizzle-orm/mysql2';
-import { formSpecs, formInstances, users } from '../../schema';
+import { formSpecs, formInstances, users } from '../../db/schema';
 import { eq } from 'drizzle-orm';
-import config from '../../../drizzle.config';
 import { resetDatabase } from 'src/utils/test-db';
 import crypto from 'crypto';
 
@@ -19,13 +20,7 @@ describe('Form Controller Tests', () => {
 
   beforeAll(async () => {
     // 设置数据库连接
-    connection = await mysql.createConnection({
-      host: config.dbCredentials.host,
-      user: config.dbCredentials.user,
-      password: config.dbCredentials.password,
-      database: config.dbCredentials.database,
-      multipleStatements: true
-    });
+    connection = await mysql.createConnection(process.env.DATABASE_URL!);
     db = drizzle(connection);
 
     // 确保数据库是干净的状态
